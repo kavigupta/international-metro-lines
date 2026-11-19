@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 
 from fetch_routes import OverpassTimeout, fetch_routes
 from routes_to_geojson import routes_to_geojson
@@ -7,6 +8,9 @@ from routes_to_geojson import routes_to_geojson
 TILE_DEGREES = 10
 CACHE = "cache/tiles"
 OUTPUT = "data/transit.geojson"
+PMTILES = "data/transit.pmtiles"
+# south of Christchurch and north of Trondheim there are no metros or trams
+SOUTH, NORTH = -50, 70
 
 
 def fetch_tile(south, west, size):
@@ -31,7 +35,7 @@ def fetch_tile(south, west, size):
 
 def main():
     elements = {}
-    for south in range(-90, 90, TILE_DEGREES):
+    for south in range(SOUTH, NORTH, TILE_DEGREES):
         for west in range(-180, 180, TILE_DEGREES):
             tile = fetch_tile(south, west, TILE_DEGREES)
             print(f"{south},{west}: {len(tile)} elements")
@@ -42,6 +46,12 @@ def main():
     with open(OUTPUT, "w") as f:
         json.dump(geojson, f)
     print(f"Wrote {len(geojson['features'])} features to {OUTPUT}")
+    # from z5, where tiles cover a country, to z14, beyond which MapLibre overzooms
+    subprocess.run(
+        ["tippecanoe", "--force", "--quiet", "-o", PMTILES, "-l", "transit", "-Z5", "-z14", OUTPUT],
+        check=True,
+    )
+    print(f"Wrote {PMTILES}")
 
 
 if __name__ == "__main__":

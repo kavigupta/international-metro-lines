@@ -19,7 +19,10 @@ def routes_to_geojson(relations):
         for m in r["members"]
         if m["type"] == "relation"
     }
-    routes = [r for r in relations if r["tags"].get("type") == "route" and "colour" in r["tags"]]
+    # some routes have no track yet, e.g. lines under construction
+    routes = [
+        r for r in relations if r["tags"].get("type") == "route" and "colour" in r["tags"] and any(tracks(r))
+    ]
     kept = [r for group in group_by_route(routes, masters).values() for r in one_direction(group)]
     colors_by_way, coords_by_way = colors_on_tracks(kept)
     return {"type": "FeatureCollection", "features": features(colors_by_way, coords_by_way)}
