@@ -17,3 +17,12 @@ in the layer `transit`, which MapLibre can load a piece at a time with the `pmti
 
 Overpass responses are cached per tile in `cache/`, so you can run the script multiple times
 and not re-download the same data. This also allows it to be resumable from interruption.
+
+## Potential errors
+
+This repository uses OSM so only has as much coverage as OSM does; in addition the downloading and
+conversion script are semi-reviewed slop.
+
+As such this probably should not be used for any application more serious than mapping.
+I find it unlikely that any lines are entirely incorrect, but they may be outdated or
+missing.
